@@ -13,6 +13,5 @@ try {
 }
 
 let db = mongoClient.db("API-MyWallet");
-let collectionUser = db.collection("users");
 
 export default db;

@@ -1,6 +1,8 @@
 import joi from "joi";
 import bcrypt from "bcrypt";
-import db from "../db.js";
+import { v4 as uuid } from "uuid";
+import { collectionUsers } from "../index.js";
+import { collectionSessions } from "../index.js";
 
 const userSchema = joi.object({
     name: joi.string().required().min(2).max(50),
@@ -9,10 +11,10 @@ const userSchema = joi.object({
 });
 
 export async function signUp(req, res) {
-    const { name, email, password } = req.body;  
- 
+    const { name, email, password } = req.body;
+
     try {
-        const compareEmail = await db.collection("users").findOne({ email });
+        const compareEmail = await collectionUsers.findOne({ email });
 
         if (compareEmail) {
             return res.status(409).send({ message: `${email} já está cadastrado` });
@@ -22,33 +24,58 @@ export async function signUp(req, res) {
 
         if (validation.error) {
             const err = validation.error.details.map((d) => d.message);
-            res.status(422).send(err);
-            return;
+            return res.status(422).send(err);
         };
 
         const passwordHash = bcrypt.hashSync(password, 2);
 
-        await db.collection("users").insertOne({ name, email, password: passwordHash });
+        await collectionUsers.insertOne({
+            name,
+            email,
+            password: passwordHash
+        });
 
         res.status(201).send("Cadastro realizado com sucesso :)");
-        
+
     } catch (err) {
         res.status(500).send(err);
     }
 };
 
 export async function signIn(req, res) {
-    const { email, password } = req.body;    
+    const { email, password } = req.body;
+    const token = uuid();
 
     try {
-        const user = await db.collection("users").findOne({ email });
-        console.log(password)
-        console.log(user.password)
+        const userExists = await collectionUsers.findOne({ email });
 
-        if (user && bcrypt.compareSync(password, user.password)) {
-            res.sendStatus(200);
-        }
+        if (!userExists) {
+            return res.status(401).send("E-mail não cadastrado");
+        };
+
+        const passwordOK = bcrypt.compareSync(password, userExists.password);
+
+        if (!passwordOK) {
+            return res.status(401).send("E-mail ou senha incorretos");
+        };
+
+        const openSession = await collectionSessions.findOne({userId: userExists._id});
+
+        if (openSession) {
+            await collectionSessions.deleteOne({userId: userExists._id,});
+        };
+
+        await collectionSessions.insertOne({
+            userId: userExists._id,
+            token
+        });
+
+        //const usersInList = await collectionSessions.find().toArray();
+        //console.log(usersInList)
+
+        res.status(200).send({token});
+
     } catch (err) {
-        res.status(404).send("Usuário ou senha incorretos");
+        res.status(500).send(err);
     }
 };
