@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import db from "./db.js";
 
-import { signUp, signIn } from './controllers/usersController.js';
+import { signUp, signIn, signOut } from './controllers/usersController.js';
 import { addEvent, getEvents } from "./controllers/cashFlowController.js";
 
 const app = express();
@@ -18,6 +18,8 @@ export let collectionSessions = db.collection("sessions");
 app.post("/sign-up", signUp);
 
 app.post("/sign-in", signIn);
+
+app.post("sign-out", signOut);
 
 app.post("/add-event", addEvent);
 

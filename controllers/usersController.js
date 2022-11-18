@@ -1,8 +1,7 @@
 import joi from "joi";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
-import { collectionUsers } from "../index.js";
-import { collectionSessions } from "../index.js";
+import { collectionUsers, collectionSessions } from "../index.js";
 
 const userSchema = joi.object({
     name: joi.string().required().min(2).max(50),
@@ -62,20 +61,24 @@ export async function signIn(req, res) {
         const openSession = await collectionSessions.findOne({userId: userExists._id});
 
         if (openSession) {
-            await collectionSessions.deleteOne({userId: userExists._id,});
-        };
+            await collectionSessions.deleteOne({userId: userExists._id});
+        };      
 
-        await collectionSessions.insertOne({
+        await collectionSessions.insertOne({            
             userId: userExists._id,
             token
         });
 
-        //const usersInList = await collectionSessions.find().toArray();
-        //console.log(usersInList)
+        // const usersOnline = await collectionSessions.find({}).toArray();
+        // console.log(usersOnline)
 
         res.status(200).send({token});
 
     } catch (err) {
         res.status(500).send(err);
     }
+};
+
+export async function signOut(req, res) {
+  
 };
