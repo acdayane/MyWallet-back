@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import db from "./db.js";
 
 import { signUp, signIn } from './controllers/usersController.js';
-import { addEvent } from "./controllers/cashFlowController.js";
+import { addEvent, getEvents } from "./controllers/cashFlowController.js";
 
 const app = express();
 dotenv.config();
@@ -20,5 +20,7 @@ app.post("/sign-up", signUp);
 app.post("/sign-in", signIn);
 
 app.post("/add-event", addEvent);
+
+app.get("/get-events", getEvents);
 
 app.listen(process.env.PORT, () => console.log(`App running on port ${process.env.PORT}`));
