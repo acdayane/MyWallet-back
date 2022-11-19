@@ -58,13 +58,13 @@ export async function signIn(req, res) {
             return res.status(401).send("E-mail ou senha incorretos");
         };
 
-        const openSession = await collectionSessions.findOne({userId: userExists._id});
+        const openSession = await collectionSessions.findOne({ userId: userExists._id });
 
         if (openSession) {
-            await collectionSessions.deleteOne({userId: userExists._id});
-        };      
+            await collectionSessions.deleteOne({ userId: userExists._id });
+        };
 
-        await collectionSessions.insertOne({            
+        await collectionSessions.insertOne({
             userId: userExists._id,
             token
         });
@@ -72,7 +72,7 @@ export async function signIn(req, res) {
         // const usersOnline = await collectionSessions.find({}).toArray();
         // console.log(usersOnline)
 
-        res.status(200).send({token});
+        res.status(200).send({ token });
 
     } catch (err) {
         res.status(500).send(err);
@@ -80,5 +80,25 @@ export async function signIn(req, res) {
 };
 
 export async function signOut(req, res) {
-  
+    const { authorization } = req.headers;
+    const token = authorization?.replace("Bearer ", "");
+
+    if (!token) {
+        return res.sendStatus(401);
+    }
+
+    try {
+        const openedSession = await collectionSessions.findOne({ token });
+
+        if (!openedSession) {
+            return res.sendStatus(401);
+        };
+
+        await collectionSessions.deleteOne({ token });
+
+        res.status(200).send("Até breve!");
+
+    } catch (err) {
+        res.sendStatus(500);
+    };
 };

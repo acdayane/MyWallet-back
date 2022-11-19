@@ -19,7 +19,7 @@ app.post("/sign-up", signUp);
 
 app.post("/sign-in", signIn);
 
-app.post("sign-out", signOut);
+app.delete("/sign-out", signOut);
 
 app.post("/add-event", addEvent);
 

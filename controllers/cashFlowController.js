@@ -53,16 +53,16 @@ export async function getEvents(req, res) {
 
     if (!token) {
         return res.sendStatus(401);
-    }
+    };
 
     try {
-        const session = await collectionSessions.findOne({ token });
+        const sessionOpened = await collectionSessions.findOne({ token });
 
-        if (!session) {
-            return res.status(401).send("Você foi desconectado. Inicie uma nova sessão.");
+        if (!sessionOpened) {
+            return res.status(401).send("É necessário iniciar uma nova sessão");
         };
       
-        const events = await collectionEvents.find({user: session.userId}).toArray();
+        const events = await collectionEvents.find({user: sessionOpened.userId}).toArray();
 
         res.status(200).send(events);
 
