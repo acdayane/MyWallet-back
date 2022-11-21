@@ -4,7 +4,7 @@ import { collectionEvents, collectionSessions } from "../index.js";
 const eventSchema = joi.object({
     description: joi.string().required().min(3).max(30),
     value: joi.number().required(),
-    operation: joi.string().valid("cashIn", "cashOut").required()
+    operation: joi.string().valid("cashIn", "cashOut")
 });
 
 export async function addEvent(req, res) {
