@@ -49,13 +49,13 @@ export async function signIn(req, res) {
         const userExists = await collectionUsers.findOne({ email });
 
         if (!userExists) {
-            return res.status(401).send("E-mail não cadastrado");
+            return res.status(401).send({message: "E-mail não cadastrado"});
         };
 
         const passwordOK = bcrypt.compareSync(password, userExists.password);
 
         if (!passwordOK) {
-            return res.status(401).send("E-mail ou senha incorretos");
+            return res.status(401).send({message: "E-mail ou senha incorretos"});
         };
 
         const openSession = await collectionSessions.findOne({ userId: userExists._id });
@@ -69,13 +69,15 @@ export async function signIn(req, res) {
             token
         });
 
+        const userName = userExists.name;
+
         // const usersOnline = await collectionSessions.find({}).toArray();
         // console.log(usersOnline)
 
-        res.status(200).send({ token });
+        res.status(200).send({ token, userName });
 
     } catch (err) {
-        res.status(500).send(err);
+        res.sendStatus(500);
     }
 };
 
@@ -96,7 +98,7 @@ export async function signOut(req, res) {
 
         await collectionSessions.deleteOne({ token });
 
-        res.status(200).send("Até breve!");
+        res.sendStatus(200);
 
     } catch (err) {
         res.sendStatus(500);
